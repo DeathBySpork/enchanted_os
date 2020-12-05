@@ -1,0 +1,55 @@
+[package]
+name = "enchanted_os"
+version = "0.1.0"
+authors = ["DeathBySpork <ericshreve02@gmail.com>"]
+edition = "2018"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+opt-level = 3
+overflow-checks = false
+debug = false
+lto = true
+debug-assertions = false
+incremental = false
+codegen-units = 1
+
+[dependencies]
+rlibc = "*"
+bootloader = { version = "*", features = ["map_physical_memory"] }
+volatile = "*"
+spin = "*"
+x86_64 = "*"
+uart_16550 = "*"
+pic8259_simple = "*"
+pc-keyboard = "*"
+linked_list_allocator = "*"
+vga = "*"
+
+[package.metadata.bootimage]
+test-args = [
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
+    "-display", "none"
+]
+test-timeout = 300 # in seconds
+
+[dependencies.lazy_static]
+version = "*"
+features = ["spin_no_std"]
+
+[dependencies.crossbeam-queue]
+version = "*"
+default-features = false
+features = ["alloc"]
+
+[dependencies.conquer-once]
+version = "*"
+default-features = false
+
+[dependencies.futures-util]
+version = "*"
+default-features = false
+features = ["alloc"]

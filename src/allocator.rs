@@ -1,0 +1,73 @@
+use alloc::alloc::{GlobalAlloc, Layout};
+use core::ptr::null_mut;
+
+use x86_64::{
+    structures::paging::{
+        FrameAllocator, Mapper, mapper::MapToError, Page, PageTableFlags, Size4KiB,
+    },
+    VirtAddr,
+};
+
+use crate::{HEAP_SIZE, HEAP_START};
+use crate::allocator::linked_list::LinkedListAllocator;
+
+pub mod linked_list;
+
+/// linked_list: Most efficient, slower <== SHOULD ALWAYS BE USED!
+/// bump - really bad allocator
+/// fixed_size_block - fast, inefficient
+#[global_allocator]
+static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+// static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
+// static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+
+pub fn init_heap(
+    mapper: &mut impl Mapper<Size4KiB>,
+    frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+) -> Result<(), MapToError<Size4KiB>> {
+    let page_range = {
+        let heap_start = VirtAddr::new(HEAP_START as u64);
+        let heap_end = heap_start + HEAP_SIZE - 1u64;
+        let heap_start_page = Page::containing_address(heap_start);
+        let heap_end_page = Page::containing_address(heap_end);
+        Page::range_inclusive(heap_start_page, heap_end_page)
+    };
+
+    for page in page_range {
+        let frame = frame_allocator
+            .allocate_frame()
+            .ok_or(MapToError::FrameAllocationFailed)?;
+        let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
+        unsafe { mapper.map_to(page, frame, flags, frame_allocator)?.flush() };
+    }
+
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
+    }
+
+    Ok(())
+}
+
+/// A wrapper around spin::Mutex to permit trait implementations.
+pub struct Locked<A> {
+    inner: spin::Mutex<A>,
+}
+
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self {
+        Locked {
+            inner: spin::Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> spin::MutexGuard<A> {
+        self.inner.lock()
+    }
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+///
+/// Requires that `align` is a power of two.
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
