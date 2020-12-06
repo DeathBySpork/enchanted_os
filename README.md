@@ -24,15 +24,6 @@ Current Versions:
 
 5.) run with `cargo run` and build with `cargo build` as normal.
 
-```
-*** FUTURE PLANNED BUILDING AND RUNNING ***
-(This is how we plan to handle building and running after work on our own custom bootloader is finished)
-** Build scripts are for Windows Only, however they can easily be modified for linux use separatly **
-1.) Ensure Rust, Cargo, and QEMU are installed properly (and added to path if on Windows)
-2.) Run `build.bat` or `run.bat` 
-    (the run script executes the build script before running)
-```
-
 ----------------
  
 In Process:
