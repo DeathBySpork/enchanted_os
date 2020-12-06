@@ -9,10 +9,9 @@ Current Versions:
     - download from https://www.qemu.org/ and install
     - ensure qemu is added to path
 
-2.) Installing BootImage:
+2.) Installing BootImage: (must be run outside of the project directory due to our forced target)
     - run the command `rustup component add llvm-tools-preview`
     - install bootimage with `cargo install bootimage` 
-      (must be run outside of the project directory due to our forced target)
 
 3.) Set the rust toolchain version to nightly to gain access to important features
     - run the command `rustup override add nightly` or `rustup override set nightly` 
@@ -23,9 +22,7 @@ Current Versions:
     `rustup component add rust-src` 
     (must be run inside the project directory)
 
-5a.) Inside of `\frame_kernel`, you can use `cargo run` or `cargo build`
-
-5b.) To run the kernel, use `build.bat` or `run.bat`
+5.) run with `cargo run` and build with `cargo build` as normal.
 
 ```
 *** FUTURE PLANNED BUILDING AND RUNNING ***
