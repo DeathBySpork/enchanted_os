@@ -38,6 +38,7 @@ pub fn init() {
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
+    vga_graphics::init_graphics();
 }
 
 // ================= ALLOCATION ERROR HANDLING

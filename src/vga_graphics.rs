@@ -9,13 +9,19 @@ use spin::Mutex;
 use vga::colors::Color16;
 use vga::writers::{Graphics640x480x16, GraphicsWriter, Text80x25, TextWriter};
 
-const graphics: Graphics640x480x16 = Graphics640x480x16::new();
+const GRAPHICS: Graphics640x480x16 = Graphics640x480x16::new();
+
+pub fn init_graphics() {
+    GRAPHICS.set_mode();
+    GRAPHICS.clear_screen(Color16::Black);
+}
 
 pub async fn hello_world() {
-    graphics.set_mode();
-    graphics.clear_screen(Color16::Black);
-    for (offset, character) in "Hello World!".chars().enumerate() {
-        graphics.draw_character(270 + offset * 8, 72, character, Color16::White)
+    write_txt("Hello, World!", 0, 0, Color16::White);
+}
+
+pub fn write_txt(s: &str, start_x: usize, start_y: usize, color: Color16) {
+    for (offset, character) in s.chars().enumerate() {
+        GRAPHICS.draw_character(start_x + offset * 8, start_y, character, color)
     }
-    graphics.draw_line((0, 0), (50, 50), Color16::Cyan);
 }
